@@ -91,6 +91,30 @@ Do this once on a golden image/VM, then clone it:
 6. If workers are Claude sessions: install `claude` in the VM and start it in
    the lane folder with the worker brief as the opening prompt.
 
+## AI agents as workers (multi-vendor)
+
+Workers can be AI coding agents instead of people — including a mix of
+vendors (Claude, plus others), and a mix of interfaces (CLI agents in VM
+shells, browser-logged-in agents in VM windows). The lane/contract design is
+what makes this safe: agents coordinate only through `contracts/` and their
+own branches, so they never need shared context. Adjustments:
+
+- **Browser agents need the windows layout**, not tmux: give each VM a
+  visible display (UTM suits this better than headless Tart) and tile the
+  windows. Separate VMs also cleanly separate account logins (e.g. personal
+  vs business accounts — keep business IP on the business account).
+- **Branch-protect the base branch.** Agents may push "directly to the repo"
+  but only ever to their own `lane/*` branch — even agents that push from
+  their vendor's cloud sandbox rather than from the VM. The branch is the
+  boundary; the VM is the login/screen container.
+- **One credential per agent**: a fine-grained token or machine user scoped
+  to the one repo, per VM/agent, for a per-agent audit trail and one-click
+  revocation.
+- **Audit strictly at assembly.** Vendors differ in how faithfully they
+  follow briefs; the lane guard, the standalone-build requirement, and the
+  pre-merge audit are the equalizers. A non-conforming lane goes back to its
+  agent — never patch it during assembly.
+
 ## SSH for the cockpit
 
 Put the four workers in `~/.ssh/config` on the host so pane commands stay short:
