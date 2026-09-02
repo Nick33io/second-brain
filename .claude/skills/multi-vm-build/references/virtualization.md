@@ -35,6 +35,27 @@ Four workers per host is the sweet spot for a 2×2 screen; give each VM
 - **KVM/libvirt** (`virt-install`/`virt-manager`) for full control; use
   `virsh domifaddr worker1` for the IP, SSH in as usual.
 
+## Multiple physical Macs (preferred when available)
+
+With 2-3 Macs the fleet spreads out and each worker gets real cores; the
+cockpit doesn't change, since panes are just SSH commands. Recommended split
+for 3 Macs: strongest Mac is the host (cockpit + orchestrator) and runs 2
+worker VMs; the other two Macs carry one worker each — bare metal over SSH
+(System Settings → General → Sharing → Remote Login) to start, or a single
+VM per Mac when disposable/resettable workers are worth the setup.
+
+Note Apple's licensing/framework limit: at most **2 concurrent macOS guest
+VMs per Apple Silicon host**. One Mac cannot run 4 macOS VMs — use Linux
+guests for extra workers, or spread macOS VMs across Macs (3 Macs → up to 6
+macOS VMs, useful when lanes need Xcode). Linux guests have no such limit.
+
+Connect the Macs with Tailscale or plain LAN `.local` hostnames, add them to
+`~/.ssh/config`, and mix freely:
+
+```bash
+scripts/cockpit.sh build "ssh vm1" "ssh vm2" "ssh mac2" "ssh mac3"
+```
+
 ## Containers (fallback one)
 
 `docker run -d --name worker1 -v worker1-src:/work <toolchain-image> sleep infinity`
